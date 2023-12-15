@@ -1,0 +1,77 @@
+#include <stdio.h>
+
+void matrix_chain_multiplication(int dimensions[], int n, int M[][n], int S[][n]) {
+    for (int i = 1; i < n; i++) {
+        M[i][i] = 0;
+    }
+
+    for (int chain_length = 2; chain_length < n; chain_length++) {
+        for (int i = 1; i < n - chain_length + 1; i++) {
+            int j = i + chain_length - 1;
+            M[i][j] = __INT_MAX__;
+            for (int k = i; k <= j - 1; k++) {
+                int cost = M[i][k] + M[k + 1][j] + dimensions[i - 1] * dimensions[k] * dimensions[j];
+                if (cost < M[i][j]) {
+                    M[i][j] = cost;
+                    S[i][j] = k;
+                }
+            }
+        }
+    }
+}
+
+void print_optimal_parenthesization(int S[][100], int i, int j, int matrix_name[]) {
+    if (i == j) {
+        printf("A%d", matrix_name[i]);
+    } else {
+        printf("(");
+        print_optimal_parenthesization(S, i, S[i][j], matrix_name);
+        print_optimal_parenthesization(S, S[i][j] + 1, j, matrix_name);
+        printf(")");
+    }
+}
+
+int main() {
+    int n;
+    printf("Enter the number of matrices: ");
+    scanf("%d", &n);
+
+    int dimensions[n + 1];
+    int matrix_name[n + 1];
+    int M[n + 1][n + 1];
+    int S[n + 1][n + 1];
+
+    for (int i = 1; i <= n; i++) {
+        int row, col;
+        printf("Enter row and column size of A%d: ", i);
+        scanf("%d %d", &row, &col);
+        dimensions[i - 1] = row;
+        dimensions[i] = col;
+        matrix_name[i] = i;
+    }
+
+    matrix_chain_multiplication(dimensions, n + 1, M, S);
+
+    printf("M Table:\n");
+    for (int i = 1; i <= n; i++) {
+        for (int j = 1; j <= n; j++) {
+            printf("%d ", M[i][j]);
+        }
+        printf("\n");
+    }
+
+    printf("S Table:\n");
+    for (int i = 1; i <= n; i++) {
+        for (int j = 1; j <= n; j++) {
+            printf("%d ", S[i][j]);
+        }
+        printf("\n");
+    }
+
+    printf("Optimal parenthesization: ");
+    print_optimal_parenthesization(S, 1, n, matrix_name);
+    printf("\n");
+    printf("The optimal ordering of the given matrices requires %d scalar multiplications.\n", M[1][n]);
+
+    return 0;
+}
