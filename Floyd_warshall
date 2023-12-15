@@ -1,0 +1,71 @@
+#include <stdio.h>
+
+#define MAX_SIZE 100
+
+typedef struct {
+  int distance;
+  int next_vertex;
+} PathNode;
+
+PathNode distance_matrix[MAX_SIZE][MAX_SIZE];
+
+void floyd_warshall(int graph[][MAX_SIZE], int n) {
+  for (int k = 0; k < n; k++) {
+    for (int i = 0; i < n; i++) {
+      for (int j = 0; j < n; j++) {
+        if (distance_matrix[i][j].distance > distance_matrix[i][k].distance + distance_matrix[k][j].distance) {
+          distance_matrix[i][j].distance = distance_matrix[i][k].distance + distance_matrix[k][j].distance;
+          distance_matrix[i][j].next_vertex = distance_matrix[i][k].next_vertex;
+        }
+      }
+    }
+  }
+}
+
+void print_shortest_path(int source, int destination) {
+  int current_vertex = source;
+  printf("%d ", source);
+  while (current_vertex != destination) {
+    current_vertex = distance_matrix[current_vertex][destination].next_vertex;
+    printf("%d ", current_vertex);
+  }
+}
+
+int main() {
+  int n;
+  printf("Enter the number of vertices: ");
+  scanf("%d", &n);
+
+  int graph[MAX_SIZE][MAX_SIZE];
+
+  // Read the weighted adjacency matrix from the user.
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j < n; j++) {
+      printf("Enter the weight of the edge from vertex %d to vertex %d: ", i, j);
+      scanf("%d", &graph[i][j]);
+      distance_matrix[i][j].distance = graph[i][j];
+      distance_matrix[i][j].next_vertex = -1;
+    }
+  }
+
+  floyd_warshall(graph, n);
+
+  // Display the shortest path between every pair of vertices.
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j < n; j++) {
+      printf("%d ", distance_matrix[i][j].distance);
+    }
+    printf("\n");
+  }
+
+  // Get the shortest path between a given pair of vertices.
+  int source, destination;
+  printf("Enter the source and destination vertex: ");
+  scanf("%d %d", &source, &destination);
+
+  printf("Shortest Path from vertex %d to vertex %d: ", source, destination);
+  print_shortest_path(source, destination);
+  printf("\n");
+
+  return 0;
+}
